@@ -1,0 +1,37 @@
+version: '3.8'
+
+services:
+  
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+    environment:
+      - JWT_SECRET=d8a9f6e7c10b4a2e5d9f0c2b3a1d4e6f8b9c2a1e7d4f8b9c2a1e7d4f8b9c2a1e
+      - SPRING_DATASOURCE_URL=jdbc:mysql://database:3306/chattingo_db
+      - SPRING_DATASOURCE_USERNAME=root # Necessary for Spring Boot to use the username
+      - SPRING_DATASOURCE_PASSWORD=yourpassword # Necessary for Spring Boot to use the password
+    command: ["sh", "-c", "sleep 45 && java -jar app.jar"] # <--- THE CRITICAL DELAY
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    environment:  # <--- WE ADDED THIS SECTION
+      - REACT_APP_API_URL=http://backend:8080  # <--- AND THIS LINE
+
+
+  database:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: yourpassword
+      MYSQL_DATABASE: chattingo_db
+    ports:
+      - "3306:3306"
+
